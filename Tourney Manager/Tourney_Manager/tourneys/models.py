@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django_countries.fields import CountryField
+from allauth.account.models import EmailAddress
 
 #SETUP
 
 # Create your models here.
+
+#TOURNEY CLASS BEGINS -----------------------------------------------------
+
 class Tourney(models.Model):
     Name = models.CharField(max_length=50)
     Game = models.CharField(max_length=50)
@@ -13,10 +17,24 @@ class Tourney(models.Model):
     Console = models.CharField(max_length=75)
     Winner = models.ForeignKey(User, null=True, blank=True, default = None)
 
+#TORNEY CLASS ENDS ---------------------------------------------------------
+
+#USER PROFILE CLASS BEGINS -------------------------------------------------
+
 class User_Profile(models.Model):
-    user = models.OneToOneField(User)
-    Nickname = models.CharField(max_length=50)
+    user = models.OneToOneField(User, related_name='profile')
     country = CountryField(default="MX")
+
+    def account_verified(self):
+        if self.user.is_authenticated:
+            result = EmailAddress.objects.filter(email=self.user.email)
+            print result
+            if len(result):
+                return result[0].verified
+        return False
+
+User.profile = property(lambda u: User_Profile.objects.get_or_create(user=u)[0])
+#USER PROFILE CLASS ENDS ---------------------------------------------------
 
 class Code(models.Model):
 	Id_user = models.ForeignKey(User, unique=True)

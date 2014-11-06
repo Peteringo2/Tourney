@@ -1,0 +1,89 @@
+<!-- CLASSES ADDED -->
+<!-- .form-signin .txt-center .mb .div-center -->
+
+{% extends "tourneys/index.html" %}
+
+{% load i18n %}
+{% load account %}
+{% load url from future %}
+
+{% block content %}
+
+<div class="container">
+
+  <div class="form-signin">
+
+      <h2 class="form-signin-heading">Please Sign In</h2>
+
+      {% if socialaccount.providers  %}
+
+        <form class="login" role="form" method="POST" action="{% url 'account_login' %}">
+          {% csrf_token %}
+          <!--{{ form.as_p }}-->
+          {{ form.non_field_errors }}
+          <input id="id_login" name="login" type="text" class="form-control mb" placeholder="Username" required="" autofocus="">
+          {{ form.login.errors }}
+          <input id="id_password" name="password" type="password" class="form-control mb" placeholder="Password" required="">
+          {{ form.password.errors }}
+          <div class="checkbox">
+            <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+            <label id="id_remember">
+              <input id="id_remember" name="remember" type="checkbox" value="remember-me"> Remember me
+            </label><br>
+          </div>
+
+          {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+          
+          <!--<button class="primaryAction" type="submit">{% trans "Sign In" %}</button>-->
+
+          <button class="primaryAction btn btn-lg btn-success btn-block" type="submit">{% trans "Sign In" %}</button>
+        </form>
+
+        <div class="txt-center mb">
+          <span>or</span>
+        </div>
+
+        <div class="socialaccount_ballot mb">
+
+            <a title="Twitter" class="socialaccount_provider twitter btn btn-block btn-social btn-lg btn-twitter" href="/accounts/twitter/login/?process=login">
+              <i class="fa fa-twitter"></i>Sign in with Twitter
+            </a>
+            <a title="Facebook" class="socialaccount_provider facebook btn btn-block btn-social btn-lg btn-facebook" href="/accounts/facebook/login/?process=login">
+              <i class="fa fa-facebook"></i>Sign in with Facebook
+            </a>
+            <a title="Google" href="/accounts/google/login/?process=login"class="socialaccount_provider google btn btn-block btn-social btn-lg btn-google-plus">
+              <i class="fa fa-google-plus"></i>Sign in with Google
+            </a>
+            
+            <!-- THIS IS TWICH -->
+            <!--
+            <a title="Twitch" class="socialaccount_provider twitch btn btn-block btn-social btn-lg btn-tumblr" href="/accounts/twitch/login/?process=login">
+              <i class="fa fa-tumblr"></i> Sign in with Twich
+            </a>-->
+
+            <!--{% include "socialaccount/snippets/provider_list.html" with process="login" %}-->
+        </div>
+
+        <!--<div >
+          {% blocktrans with site.name as site_name %}
+          Or, <a href="{{ signup_url }}">sign up</a>
+          for a {{site_name}} account and sign in below:{% endblocktrans %}
+        </div>-->
+
+        {% include "socialaccount/snippets/login_extra.html" %}
+
+        <div class="txt-center">
+          <p>{% blocktrans %}Or just use an email to
+          <a href="{{ signup_url }}">sign up</a>.{% endblocktrans %}</p>
+          {% endif %}
+        </div>
+
+        {% endblock %}
+
+  </div>
+
+</div>
+
+

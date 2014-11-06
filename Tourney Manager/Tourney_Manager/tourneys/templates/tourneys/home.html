@@ -1,0 +1,25 @@
+{% extends "tourneys/index.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/font-awesome-4.2.0/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/freelancer.css' %}" />
+
+<!-- Header -->
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <img class="img-responsive" src="{% static 'tourneys/img/profile.png' %}" alt="">
+                    <div class="intro-text">
+                        <span class="name">My Tourney</span>
+                        <hr class="star-light">
+                        <span class="skills"> Tournaments - Ratings - Records - Fun </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+{% endblock %}

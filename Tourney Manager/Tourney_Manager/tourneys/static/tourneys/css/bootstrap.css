@@ -3769,7 +3769,6 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .navbar {
   position: relative;
   min-height: 50px;
-  margin-bottom: 20px;
   border: 1px solid transparent;
 }
 @media (min-width: 768px) {
@@ -5533,6 +5532,25 @@ button.close {
   background-color: #000;
   border-radius: 4px;
 }
+
+.form-signin {
+  max-width: 350px;
+  padding: 15px;
+  margin: 50px auto;
+}
+
+.txt-center{
+  text-align: center; 
+}
+
+.mb{
+  margin-bottom: 10px;
+}
+
+.div-center{
+  margin: 0 auto;
+}
+
 .tooltip-arrow {
   position: absolute;
   width: 0;
