@@ -1,0 +1,29 @@
+{% extends "tourneys/index.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/font-awesome-4.2.0/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/freelancer.css' %}" />
+
+<!-- Header -->
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="intro-text">
+                        <span class="name">My Tourneyes:</span>
+                    </div>
+                    {% if latest_tourneys_list %}
+                    <ul>
+                      <!---Get torneys-->
+                    </ul>
+                    {% else %}
+                      <p>No tourneys are available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+{% endblock %}
