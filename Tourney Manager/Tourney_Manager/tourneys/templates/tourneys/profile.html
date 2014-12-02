@@ -1,43 +1,151 @@
 {% extends "tourneys/index.html" %}
 {% load staticfiles %}
 
-{% block content %}
+{% block content %} 
 
-<div class="container">
-    
-    <div class="row">
+    {% if request.user.is_authenticated %}
 
-        <div id="personal-info" class="col-md-4 col-md-offset-1" style="padding: 10px 20px 20px 20px; margin-top: 50px; background-color:#CEF6E3; border-radius: 15px;">
-            <h3>
-                <span class="label label-success">Personal Info <span class="glyphicon glyphicon-user"></span></span>
-            </h3>
-            <br>
-            <input id="nickname" name="nickname" type="text" class="form-control mb" placeholder="Username" required="" autofocus="" disabled="disabled">
-            <input id="email" name="email" type="email" class="form-control mb" placeholder="Email" required="" autofocus="" disabled="disabled">
-            <div class="list-inline">
-                <li><h4><span class="label label-default"><span class="glyphicon glyphicon-home"></span> Country</span></h4></li>
-                <li>
-                    <select class="form-control" disabled="disabled">
-                        <option value="MX">MX</option>
-                        <option value="BRZ">BRZ</option>
-                        <option value="US">US</option>
-                    </select>
-                </li>
+        <div class="container">
+            
+            <!-- ALERTS -->
+            <div id="success_alert" class="alert alert-success" role="alert" style="display:none; position: absolute; margin-left: auto;
+            margin-right: auto; left: 0; right: 0; text-align:center">
+              <strong>Success!</strong><span id="content"></span>
+              <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
             </div>
-            <br>
-            <div class="list-inline">
-                <li><button class="btn btn-warning btn-block">Edit</button></li>
-                <li><button class="btn btn-primary btn-block" disabled="disabled">Save</button></li>
+            <div id="error_alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none; position: absolute; margin-left: auto;
+            margin-right: auto; left: 0; right: 0; text-align:center">
+              <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
+              <strong>Error!</strong><span id="content"></span>
+            </div>
+
+            <div class="row" style="padding: 10px 20px 20px 20px; margin-top: 50px; background-color:#CEF6E3; border-radius: 15px;">
+
+                <div id="personal-info" class="col-md-8 col-md-offset-2">
+                    
+                    <div class="col-md-4">
+                        <h3>
+                        <span class="label label-success" style="display:block; margin: 0 auto; width: 80%">Personal Info &nbsp;<span class="glyphicon glyphicon-user"></span>&nbsp;</span>
+                        </h3>
+                        <br>
+                        <input id="username" name="username" type="text" class="form-control mb" placeholder="Username" required="" autofocus="" disabled="disabled" value="{{request.user.username}}">
+                            <h4>
+                                <span class="label label-default" style="margin: 0 auto; display: block; width: 50%;"><span class="glyphicon glyphicon-home"></span> Country</span>
+                            </h4>
+                            <select id="country" class="form-control">
+                                {% for code, name in countries %}
+                                    <option value="{{code}}">{{name}}</option>
+                                {% endfor %}
+                            </select>
+                        <br>
+                        <button id="save_btn" class="btn btn-success btn-block" style="margin: 0 auto; width: 70%;">Save Changes</button>
+                    </div>
+
+                    <div class="col-md-5 col-md-offset-2">
+                        <div id="add">
+                            <h3>
+                                <span class="label label-primary" style="margin: 0 auto; display: block; width: 65%;">Add Code &nbsp;<span class="glyphicon glyphicon-hdd"></span>&nbsp;</span>
+                            </h3>
+                            <br>
+                            <input id="nickname" name="nickname" type="text" class="form-control mb" placeholder="Nickname" required="" autofocus="" maxlength="50">
+                            <input id="friendcode" name="friendcode" type="text" class="form-control mb" placeholder="Friend Code" required="" autofocus="" maxlength="50">
+
+                            <h4>
+                                <span class="label label-default" style="width: 50%; display: block; margin: 0 auto;">Console <span class="glyphicon glyphicon-hdd"></span></span>
+                            </h4>
+                            <select id="sel-console" class="form-control" style="width: 70%; margin: 0 auto;">
+                                {% for console in consoles %}
+                                    <option value="{{console}}">{{console}}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <button id="add_code_btn" class="btn btn-primary btn-block" style="margin: 0 auto; width: 70%">&nbsp;<span class="glyphicon glyphicon-plus"></span>&nbsp;Add Code</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {% if codes %}
+
+                <div class="row" style="background-color:#CEF6E3; border-radius: 15px; margin-top: -20px;">
+                    <br>
+                    <!-- CAROUSEL -->
+                    <div id="myCarousel" class="carousel slide col-md-3 col-md-offset-4" >
+                        <h3>
+                            <span class="label label-danger" style="display:block; margin: 0 auto; width: 70%;">My Codes &nbsp;<span class="glyphicon glyphicon-hdd">
+                        </h3>
+                        <br>
+                        <div class="carousel-inner">
+                            {% for code in codes %}
+                                {% if forloop.first%}
+                                     <div class="active item">
+                                        <span class="span_centered">Nickname</span>
+                                        <input id="nickname" name="nickname" type="text" class="form-control mb" placeholder="Nickname" required="" autofocus="" maxlength="50" value="{{code.Nickname}}">
+                                        <span class="span_centered">Friendcode</span>
+                                        <input id="friendcode" name="friendcode" type="text" class="form-control mb" placeholder="Friend Code" required="" autofocus="" maxlength="50" value="{{code.FC}}">
+                                    </div>
+                                {% else %}
+                                    <div class="item">
+                                        <span class="span_centered">Nickname</span>
+                                        <input id="nickname" name="nickname" type="text" class="form-control mb" required="" autofocus="" maxlength="50" value="{{code.Nickname}}">
+                                        <span class="span_centered">Friendcode</span>
+                                        <input id="friendcode" name="friendcode" type="text" class="form-control mb" placeholder="Friend Code" required="" autofocus="" maxlength="50" value="{{code.FC}}">
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <button id="code_btn" class="btn btn-danger btn-block" style="width: 70%; margin: 10px auto 0px auto;">Save Changes</button>
+                    </div>
+                    <div class="col-md-offset-6" style="margin-top: 110px;">
+                        <!-- LINKED NAV -->
+                        <ol class="carousel-linked-nav pagination">
+                            {% for code in codes %}
+                                {% if forloop.counter == 0 %}
+                                    <li class="active"><a href="#{{forloop.counter}}">{{code.Console}}</a></li>
+                                {% else %}
+                                    <li><a href="#{{forloop.counter}}">{{code.Console}}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                        <br>
+                    </div> 
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <script type="text/javascript" src="{% static 'tourneys/js/profile/profile.js' %}"> </script>
+        <script stype="text/javascript"> 
+            $('#country').val("{{country}}"); 
+            $("#profile").addClass("active");
+        </script>
+
+    {% else %}
+
+        <div class="modal" id="myModal">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background-color: #fcf8e3; border-color: #faebcc; color: #8a6d3b;">
+                    <div class="modal-body">
+                        You need to have an account in order to check your profile.
+                        You will be redirected to the Sign in page.
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-2"></div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2"></div>
+        <script type="text/javascript">
+            $('#myModal').modal({ show: true })
+            
+            $('html').click(function() {
+                // similar behavior as an HTTP redirect
+                window.location.replace("http://mytourney.com:8000/accounts/login/");
+            });
+        </script>
 
-    </div>
-
-</div>
+    {% endif %}
 
 {% endblock %}
+

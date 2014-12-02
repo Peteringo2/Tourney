@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django_countries.fields import CountryField
 from allauth.account.models import EmailAddress
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 #SETUP
 
@@ -10,12 +11,15 @@ from allauth.account.models import EmailAddress
 #TOURNEY CLASS BEGINS -----------------------------------------------------
 
 class Tourney(models.Model):
-    Name = models.CharField(max_length=50)
-    Game = models.CharField(max_length=50)
-    Start_date = models.DateTimeField('Start Date')
-    End_date = models.DateTimeField('End Date')
-    Console = models.CharField(max_length=75)
-    Winner = models.ForeignKey(User, null=True, blank=True, default = None)
+	Owner = models.ForeignKey(User, related_name="owner", default=None)
+	Name = models.CharField(max_length=50)
+	Game = models.CharField(max_length=50)
+	Max_participants = models.IntegerField(default=2)
+	Creation_date = models.DateTimeField('Creation Date')
+	Start_date = models.DateTimeField('Start Date')
+	Console = models.CharField(max_length=75)
+	Winner = models.ForeignKey(User, null=True, blank=True, default = None, related_name="winner")
+	Finished = models.BooleanField(default=False)
 
 #TORNEY CLASS ENDS ---------------------------------------------------------
 
@@ -37,27 +41,28 @@ User.profile = property(lambda u: User_Profile.objects.get_or_create(user=u)[0])
 #USER PROFILE CLASS ENDS ---------------------------------------------------
 
 class Code(models.Model):
-	Id_user = models.ForeignKey(User, unique=True)
+	Id_user = models.ForeignKey(User)
 	FC = models.CharField(max_length=50)
+	Nickname = models.CharField(max_length=50, default="Default")
 	Console = models.CharField(max_length=75)
 
 class Round(models.Model):
-	Id_tourney = models.ForeignKey(Tourney, unique=True)
+	Id_tourney = models.ForeignKey(Tourney)
 	Name = models.CharField(max_length=50)
 	Start_date = models.DateTimeField('Start Date')
 	End_date = models.DateTimeField('End Date')
 
 class Match(models.Model):
-	Id_round = models.ForeignKey(Round, unique=True)
+	Id_round = models.ForeignKey(Round,)
 	Id_Winner = models.ForeignKey(User, null=True, blank=True, default = None)
 	Start_date = models.DateTimeField('Start Date')
 
 class User_Tourney(models.Model):
-	Id_tourney = models.ForeignKey(Tourney, unique=True)
-	Id_user = models.ForeignKey(User, unique=True)
+	Id_tourney = models.ForeignKey(Tourney)
+	Id_user = models.ForeignKey(User)
 
 class User_Match(models.Model):
-	Id_match = models.ForeignKey(Match, unique=True)
-	Id_user = models.ForeignKey(User, unique=True)
+	Id_match = models.ForeignKey(Match)
+	Id_user = models.ForeignKey(User)
 	Arrive_time = models.DateTimeField('Arrive Time')
 

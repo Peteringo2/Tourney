@@ -5,29 +5,58 @@
 	.helvetica{
 		text-transform: uppercase;
 	    font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
-	    font-weight: 700;
+	    font-weight: 700;	
 	    letter-spacing: 1px;
 	}
 
+	.span_centered{
+        margin: 0px auto;
+        display: block;
+        text-align: center;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        background: #d07b70; 
+        border-radius: 25px 25px 0 0;
+    }
+
+	.pagination > .active > a,  .pagination > .active > a:focus{
+    	background-color: white;
+	}
+
+	.label_block{
+		margin: 0 auto;
+		display: block;
+	}    
+
 </style>
 
-
-<script type="text/javascript" src="{% static 'tourneys/js/jquery-1.11.1.min.js' %}" ></script>
+<script type="text/javascript" src="{% static 'tourneys/js/bootstrap-datetimepicker/moment.js' %}" ></script>
+<script type="text/javascript" src="{% static 'tourneys/js/jquery-1.11.1.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'tourneys/js/bootstrap.min.js' %}" ></script>
+<script type="text/javascript" src="{% static 'tourneys/js/jquery.cookie.js' %}" ></script>
+<script type="text/javascript" src="{% static 'tourneys/js/profile/profile.js' %}"></script>
+<script type="text/javascript" src="{% static 'tourneys/js/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'tourneys/js/jquery.cookie.js' %}" ></script>
+<script type="text/javascript" src="{% static 'tourneys/js/jquery.bracket-world.min.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/bootstrap.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/bootstrap-social.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/font-awesome-4.2.0/css/font-awesome.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'tourneys/css/jquery.bracket-world.css' %}" rel="stylesheet">
 
 <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
 	<div class="container-fluid helvetica">
-		<a class="navbar-brand" href="/tourneys">Gamie Tourney</a>
+		<a id="title" class="navbar-brand active" href="/tourneys">Gamie Tourney</a>
 
 		<!-- Collect the nav links, forms, and other content for toggling -->
     	<div class="collapse navbar-collapse helvetica" id="bs-example-navbar-collapse-1">
 
     		<ul class="nav navbar-nav">
-    			<li><a href="/tourneys/profile">Profile</a></li>
-					<li><a href="/tourneys/tourneyhome">LetsPLay</a></li>
+    			{% if request.user.is_authenticated %}
+    				<li id="profile"><a href="/tourneys/profile">Profile</a></li>
+    				<li id="tourneys"><a href="/tourneys/my_tourneys">Tourneys</a></li>
+    			{% endif %}
     		</ul>
 
     		<ul class="nav navbar-nav navbar-right">
@@ -36,15 +65,15 @@
 
 				<li> <a href="/accounts/logout">Log out</a> </li>
 
-				<li>
+				<li> 
 					<a>Hi, {{ request.user.username }}
 					{% if request.user.profile.account_verified %} {% else %} (unverified) {% endif %}</a>
 				</li>
 
 			{% else %}
 
-		        <li> <a href="/accounts/login">Sign In</a> </li>
-		        <li> <a href="/accounts/signup">Sign Up</a> </li>
+		        <li id="sign_in"> <a href="/accounts/login">Sign In</a> </li>
+		        <li id="sign_up"> <a href="/accounts/signup">Sign Up</a> </li>
 
 		    {% endif %}
 
@@ -56,5 +85,5 @@
 </nav>
 
 <div id="content" >
-	{% block content %}{% endblock %}
+	{% block content %}{% endblock %}  
 </div>
