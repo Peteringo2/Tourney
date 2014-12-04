@@ -41,13 +41,57 @@ $(".tournaments").click(function(){
 //SAVE USER INFORMATION
 $("#add_tourney_btn").click(function(){
 
+    var check_in = 'false';
+    if ($('#check_in').is(":checked"))
+        check_in = 'true';
+
+    var error = false;
+
+    if( $('#name').val() == "" ){
+        displayAlert("error_alert", " Please enter a name for the tournament");
+        error = true;
+    }
+
+    if( $('#game').val() == "" ){
+        displayAlert("error_alert", " Please enter a game for the tournament");
+        error = true;
+    }
+
+    if (!$.isNumeric($("#max_participants").val())) {
+        displayAlert("error_alert", " Please enter a number for the Max Participants field");
+        error = true;
+    }
+
+    var n_par = parseInt($("#max_participants").val());
+
+    if( n_par < 2 || n_par > 256 ){
+        displayAlert("error_alert", " Please enter a number between 2 and 256 for the Max Participants field");
+        error = true;
+    }
+
+    if ( ! $..isNumeric($("#periodicity").val() ) ) {
+        displayAlert("error_alert", " Please enter a number for the Periodicity field");
+        error = true;
+    }
+
+    var n_periodicity = parseInt($("#periodicity").val());
+
+    if(n_periodicity % 15 != 0){
+        displayAlert("error_alert", " Periodicity must be a multiple of 15");
+        error = true;
+    }
+
+    if(error)
+        return;
+    
     //AJAX CALL TO THE SAVE PROFILE METHOD
     $.ajax({
         url : "../add_tourney/", // the endpoint
         type : "POST", // http method
-        data : { name : $('#name').val(), game :  $('#game').val(), max_participants : $("#max_participants").val(), console : $("#sel-console").val(), start_date : $("#datetimepicker").data("DateTimePicker").getDate()._d }, // data sent with the post request
+        data : { name : $('#name').val(), game :  $('#game').val(), max_participants : $("#max_participants").val(), console : $("#sel-console").val(), start_date : $("#datetimepicker").data("DateTimePicker").getDate()._d, periodicity : $("#periodicity").val(), check_in : check_in }, // data sent with the post request
         success : function(response) {
-            displayAlert("success_alert", " Tourney created successfully.");
+            //displayAlert("success_alert", " Tourney created successfully.");
+            window.location.href = "http://mytourney.com:8000/tourneys/" + response + "/";
         },
         error : function(xhr,errmsg,err) {
             displayAlert("error_alert", " An error occurred while creating the tournament");

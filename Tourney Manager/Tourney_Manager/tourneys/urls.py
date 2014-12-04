@@ -12,5 +12,7 @@ urlpatterns = patterns('',
     url(r'^add_tourney/$' , views.add_tourney, name='add_tourney'),
     # ex: /tourneys/5/
     url(r'^(?P<tourney_id>[0-9]+)/$', views.view_tourney, name='view_tourney'),
-    url(r'^sign_up/$' , views.sign_up, name='sign_up')
+    url(r'^sign_up/$' , views.sign_up, name='sign_up'),
+    url(r'^createMatch/$' , views.createMatch, name='createMatch')
+    
 )

@@ -26,12 +26,12 @@
 
         <!-- ALERTS -->
         <div id="success_alert" class="alert alert-success" role="alert" style="display:none; position: absolute; margin-left: auto;
-        margin-right: auto; left: 0; right: 0; text-align:center">
+        margin-right: auto; left: 0; right: 0; text-align:center; z-index: 100;">
           <strong>Success!</strong><span id="content"></span>
           <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
         </div>
         <div id="error_alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none; position: absolute; margin-left: auto;
-        margin-right: auto; left: 0; right: 0; text-align:center">
+        margin-right: auto; left: 0; right: 0; text-align:center; z-index: 100;">
           <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
           <strong>Error!</strong><span id="content"></span>
         </div>
@@ -57,13 +57,12 @@
                     </li>
                     <li id="category" data-toggle="collapse" data-target="#categories">
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Categories<span class="fa arrow active"></span></a>
-                    <ul class="nav sub-menu collapse" id="categories" style="text-align:center;">
-                        <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=3DS">3DS</a></li>
-                        <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=WII%20U">WII U</a></li>
-                        <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=PLAY%20STATION%204">PLAY STATION 4</a></li>
-                        <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=XBOX%20ONE">XBOX ONE</a></li>
-                    </ul>
-                    <!-- /.nav-second-level -->
+                        <ul class="nav sub-menu collapse" id="categories" style="text-align:center;">
+                            <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=3DS">3DS</a></li>
+                            <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=WII%20U">WII U</a></li>
+                            <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=PLAY%20STATION%204">PLAY STATION 4</a></li>
+                            <li><a class="tournaments" href="/tourneys/my_tourneys?filter=category&console=XBOX%20ONE">XBOX ONE</a></li>
+                        </ul>
                     </li>
                     <li>
                         <a id="menu_create_tourney" href="#"><i class="fa fa-edit fa-fw"></i> Create Tournament</a>
@@ -75,7 +74,7 @@
 
         <div id="page-wrapper">
             <div class="row" style="padding-top: 10px;">
-                <div id="form_new_tourney" class="col-md-4 col-md-offset-4 hide" style="margin-top: 100px;">
+                <div id="form_new_tourney" class="col-md-4 col-md-offset-4 hide" style="margin-top: 60px;">
                     <div id="add">
                         <h3>
                             <span class="label label-primary" style="margin: 0 auto; display: block;">New Tournament &nbsp;<span class="glyphicon glyphicon-list-alt"></span>&nbsp;</span>
@@ -92,15 +91,15 @@
                             </div>
                         </div>
                         <ul class="list-inline">
-                            <li style="margin-left: 75px; font-weight: 700;">
+                            <li style="margin-left: 65px; font-weight: 700;">
                                 <span>Max players</span>
                             </li>
-                            <li style="width:20%;">
-                                <input id="max_participants" name="max_participants" type="number" class="form-control" value="2" required="" autofocus="" maxlength="4">
+                            <li style="width:30%;">
+                                <input id="max_participants" name="max_participants" type="number" class="form-control" value="2" required="" autofocus="" min="2" max="256">
                             </li>
                         </ul>
                         <ul class="list-inline">
-                            <li style="margin-left: 50px; font-weight: 700;">
+                            <li style="margin-left: 53px; font-weight: 700;">
                                 <span>Console</span>
                             </li>
                             <li>
@@ -109,6 +108,22 @@
                                         <option value="{{console}}">{{console}}</option>
                                     {% endfor %}
                                 </select>
+                            </li>
+                        </ul>
+                        <ul class="list-inline">
+                            <li style="margin-left: 50px; font-weight: 700;">
+                                <span>Periodicity (Min)</span>
+                            </li>
+                            <li style="width:30%;">
+                                <input id="periodicity" name="periodicity" type="number" class="form-control" required="" autofocus="" value="15" step="15">
+                            </li>
+                        </ul>
+                        <ul class="list-inline">
+                            <li style="margin-left: 80px; font-weight: 700;">
+                                <span>Check In (5 Min)</span>
+                            </li>
+                            <li >
+                                <input id="check_in" name="check_in" type="checkbox" class="" autofocus="">
                             </li>
                         </ul>
                         <br>

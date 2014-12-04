@@ -27,12 +27,12 @@
         <div id="tourney_id" class="hide">{{tourney_id}}</div>
         <!-- ALERTS -->
         <div id="success_alert" class="alert alert-success" role="alert" style="display:none; position: absolute; margin-left: auto;
-        margin-right: auto; left: 0; right: 0; text-align:center">
+        margin-right: auto; left: 0; right: 0; text-align:center; z-index: 100;">
           <strong>Success!</strong><span id="content"></span>
           <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
         </div>
         <div id="error_alert" class="alert alert-danger alert-dismissible" role="alert" style="display:none; position: absolute; margin-left: auto;
-        margin-right: auto; left: 0; right: 0; text-align:center">
+        margin-right: auto; left: 0; right: 0; text-align:center; z-index: 100;">
           <a class="close" style="float: right;" onclick="$('.alert').hide()">×</a>
           <strong>Error!</strong><span id="content"></span>
         </div>
@@ -40,7 +40,7 @@
         <div class="navbar-default sidebar" role="navigation" style="height: 100%; margin-top: 0px;">
             <div class="sidebar-nav navbar-collapse">
                 <ul class="nav" id="side-menu" style="font-weight: 700;">
-                    <li style="padding: 10px;">
+                    <li style="padding-top: 50px;">
                         <div class="header-card">Game</div> <div class="card">{{tourney.Game}}</div> <br>
                         <div class="header-card">Name</div> <div class="card">{{tourney.Name}}</div> <br>
                         <div class="header-card">Max Players</div> <div class="card">{{tourney.Max_participants}}</div> <br>
@@ -82,7 +82,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="header-card"> When the tournament starts, the bracket will be shown here </div><br>
+                <div class="header-card"> When the tournament starts, the bracket will be shown here Numero de Rondas : {{num_rounds}}</div><br>
                 <div id="bracket" class="bracket"></div>
             </div>
         </div>
@@ -96,13 +96,121 @@
             if( "{{is_full}}" == 'True')
                 $("#sign_up").prop("disabled", true);
 
-            if("{{has_started}}" == 'True')
-                $('#bracket').bracket({teams: "{{registered_count}}", scale : .80,
+            if("{{has_started}}" == 'True'){
+                var bracket = $('#bracket').bracket({teams: "{{registered_count}}", scale : .80,
                  teamNames:[
                     {% for participant in participants %}
                         { name : "{{participant.Id_user}}"},
                     {% endfor %}
+                        { name : "fernando" }
                 ]});
+
+                bracket.data("bracket").setVertical();
+            }
+
+            var players = $("#bracket").find(".team-name");
+
+            {% for user, code in codes.items %}
+
+                players.each(function(index) {
+                    if( $(this).text() == "{{user}}")
+                        $(this).attr("title", "Nickname: {{code.Nickname}} FC: {{code.FC}}");
+                });
+
+            {% endfor %}
+
+            $("#bracket button").removeAttr('title');
+
+            {% if create_matchs %}
+
+                var num_rounds = parseInt("{{num_rounds}}");
+                var rounds_dict = [];
+
+                //GETS MATCHS
+                for(var i = 0; i < num_rounds; i++){
+                    var matchs_round = $('#bracket').find('.matchup-outer[rel=round' + i + ']');
+                    rounds_dict[i] = [];
+
+                    matchs_round.each(function(index) {
+                        var match_str = $(this).attr('class').split(/\s+/)[1];
+                        var match_number = match_str.substring(match_str.indexOf('-') + 1);
+                        rounds_dict[i].push(match_number);
+                    });
+                }
+
+                
+                //CONSTRUCT MATCHS 
+                for(var i = 0; i < rounds_dict.length; i++){
+                    for(var j = 0, p = 0; j < rounds_dict[i].length; j++){
+                        if(j > 0 && j % 2 == 0)
+                            p++;
+                        var match = $('#bracket').find(".matchup-" + rounds_dict[i][j]);
+                        var user_array = [];
+                        user_array[0] = match.find(".team-name-top").text();
+                        user_array[1] = match.find(".team-name-bottom").text();
+                        if(user_array[0] != '' && user_array[1] != ''){
+                            var pointer = 0;
+                            if(i + 1< rounds_dict.length)
+                                pointer = rounds_dict[i + 1][p];
+                            addMatch(user_array[0], user_array[1], rounds_dict[i][j], pointer, i);
+                        }
+                    }
+                }
+
+                //CONSTRUCT FINAL
+                var final_rounds = $('#bracket').find('.matchup-outer[rel=round' + (num_rounds + 1) + ']');
+                var final_array = [];
+
+                final_rounds.each(function(index) {
+                    if(final_array.length < 2)
+                        final_array.push($(this).find(".svg-team-top .team-name-top").text());
+                });
+                if(final_array[0] != "" && final_array[1] != "")
+                    addMatch(final_array[0], final_array[1], -1, -1, num_rounds + 1)
+            
+            {% endif %}
+
+            function addMatch(username_1, username_2, match_number, match_pointer, current_round){
+
+                //AJAX CALL TO THE EDIT CODE METHOD
+                $.ajax({
+                    url : "../createMatch/", // the endpoint
+                    type : "POST", // http method
+                    data : { tourney_id : $("#tourney_id").text(), username_1 : username_1, username_2 : username_2, round_number : current_round, match_pointer : match_pointer, match_number : match_number},
+                    success : function(response) {
+                        //displayAlert("success_alert", response);
+                    },
+                    error : function(xhr,errmsg,err) {
+                        //displayAlert("error_alert", " Error creating matchs");
+                    }
+                });
+
+            }
+
+            /*$(".matchup-4").prepend('<div class="svg-team-top svg-team-top-3" style="position: absolute; top: 0px; left: 1px; width: 200px; height: 40px; -webkit-transform: rotate(0deg) translateY(0px);">      <div class="svg-team-inner svg-team-inner-3" rel="svg-team-inner-3">        <div class="team-name team-name-top team-name-3" style="width: 165px;" title="Nickname: PedroGoogle FC: 55555555555">pedro2</div>        <div class="team-seed"></div>      </div>    </div>');*/
+
+            $(function() {
+                $( document ).tooltip();
+            });
+
+                        /*var matchs_round = $('#bracket').find('.matchup-outer[rel=round{{current_round}}]');
+            var user_array = [];
+
+            matchs_round.each(function(index) {
+
+                if(user_array.length == 2){
+                    addMatch(user_array[0], user_array[1])
+                    user_array = [];
+                }
+
+                var username = $(this).text();
+                var pattern = " ",
+                re = new RegExp(pattern, "g");
+                username = username.replace(re, "");
+                if(username != "")
+                    user_array.push(username);
+
+            });*/
 
         </script>
 

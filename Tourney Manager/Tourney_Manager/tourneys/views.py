@@ -10,6 +10,7 @@ import helpers
 import datetime
 from time import strptime
 from django.utils import timezone
+from math import *
 
 #----------------------------------------------------------------------------------------
 #--------------------------------------- INDEX ------------------------------------------
@@ -26,10 +27,12 @@ def my_tourneys(request):
 	try:
 		var_filter = request.GET.get('filter')
 		tourneys = None
+		user = User.objects.get(username=request.user)
 		if var_filter == 'all':
 			tourneys = Tourney.objects.filter(Finished=False)
 		elif var_filter == 'mine':
-			tourneys = Tourney.objects.filter(Finished=False)
+			user_tourney = User_Tourney.objects.filter(Id_user=user)
+			tourneys = [ x.Id_tourney for x in user_tourney if not x.Id_tourney.Finished ]
 		elif var_filter == 'category':
 			tourneys = Tourney.objects.filter(Console=request.GET.get('console'))
 
@@ -42,33 +45,99 @@ def add_tourney(request):
 	try:
 		user = User.objects.get(username=request.user)
 		date = helpers.getDateFromString( request.POST.get('start_date') )
-		tourney = Tourney(Owner=user, Name=request.POST.get('name'), Game=request.POST.get('game'), Max_participants=request.POST.get('max_participants'), Creation_date=datetime.datetime.now() - datetime.timedelta(hours=6), Console=request.POST.get('console'), Start_date=date)
+		check_in = False if request.POST.get('check_in') == 'false' else True
+		tourney = Tourney(Owner=user, Name=request.POST.get('name'), Game=request.POST.get('game'), Max_participants=request.POST.get('max_participants'), Creation_date=datetime.datetime.now() - datetime.timedelta(hours=6), Console=request.POST.get('console'), Start_date=date, Periodicity=request.POST.get('periodicity'), Check_in=check_in)
 		tourney.save()
 	except ObjectDoesNotExist:
 		return HttpResponse('User does not exists')
 
-	return HttpResponse( "Success" )
+	return HttpResponse(tourney.id)
 
 def view_tourney(request, tourney_id):
 	try:
+		#get user and tourney objects
 		user = User.objects.get(username=request.user)
 		tourney = Tourney.objects.get(id=tourney_id)
+		#check if the current user is the owner of the tourney
 		is_owner = True if request.user == tourney.Owner else False
+		#get the users sign up in the tourney
 		participants = User_Tourney.objects.filter(Id_tourney=tourney_id)
 		number_participants = len(participants)
+		#check if the user is registered in the tourney
 		is_registered = True if len( User_Tourney.objects.filter(Id_tourney=tourney_id, Id_user=user) ) > 0 else False
+		#check if the tournament is full
 		full = number_participants == tourney.Max_participants
+		#get today and tournament date
 		today = datetime.datetime.now() - datetime.timedelta(hours=6)
 		tourney_date = tourney.Start_date.astimezone(timezone.utc).replace(tzinfo=None)
+		#check if the tournament has started
 		has_started = today > tourney_date
+		#get the number of rounds
+		n_rounds = int(ceil(log(number_participants, 2)))
+		#boolean value for creating matchs
+		create_match = not tourney.Created_rounds
+		#check if the tournament has started and send the tournament user registered and their codes
 		if has_started:
-			generateRound1()
+			codes = { x.Id_user.username : Code.objects.get(Id_user=x.Id_user, Console=tourney.Console) for x in participants}
+			if not tourney.Created_rounds:
+				createRounds(tourney, n_rounds)
+		#get the final round value, cause of the bracket plugin
+
 	except ObjectDoesNotExist:
 		return HttpResponse("Tourney not found")
 
-	return render(request, "tourneys/tourneys.html", { 'tourney' : tourney, 'is_owner' : is_owner, 'registered_count' : number_participants, 'tourney_id' : tourney_id, 'is_registered' : is_registered, 'participants' : participants, 'is_full' :  full, 'has_started' : has_started})
+	return render(request, "tourneys/tourneys.html", { 'tourney' : tourney, 'is_owner' : is_owner, 'registered_count' : number_participants, 'tourney_id' : tourney_id, 'is_registered' : is_registered, 'participants' : participants, 'is_full' :  full, 'has_started' : has_started, 'codes' : codes, 'num_rounds' : n_rounds, 'create_matchs' : create_match})
 
-def generateRound1():
+def createRounds(tourney, n_rounds):
+	for i in range(n_rounds):
+		createRound(tourney, i + 2 if i == n_rounds - 1 else i)
+	tourney.Created_rounds = True
+	tourney.save()
+	return True
+
+def isRoundCreated(tourney, n_round):
+	o_round = Round.objects.filter(Id_tourney=tourney)
+	if o_round is None:
+		return False
+	return o_round.Round_number == n_round
+
+def isRoundFinished(tourney, n_round):
+	o_round = Round.objects.filter(Id_tourney=tourney, Round_number=n_round)
+	matchs = Match.objects.filter(Id_round=o_round)
+	for match in matchs:
+		if match.Id_Winner is None:
+			return False
+	return True
+
+#create round method
+def createRound(tourney, n_round):
+	o_round = Round(Id_tourney=tourney, Round_number=n_round, Start_date=tourney.Start_date + datetime.timedelta(minutes=tourney.Periodicity * n_round), End_date=tourney.Start_date + datetime.timedelta(minutes=tourney.Periodicity * (n_round + 1)))
+	o_round.save()
+	return True
+
+#create match
+def createMatch(request):
+	tourney_id = request.POST.get('tourney_id')
+	round_number = int(request.POST.get('round_number'))
+	tourney = Tourney.objects.get(id=tourney_id)
+	o_round = Round.objects.get(Id_tourney=tourney, Round_number=round_number)
+	match = Match(Id_round=o_round, Match_number=int(request.POST.get('match_number')), Match_Pointer=int(request.POST.get('match_pointer')))
+	match.save()
+	username_1 = request.POST.get('username_1')
+	username_2 = request.POST.get('username_2')
+	arrive_time = o_round.Start_date + datetime.timedelta(minutes=5)
+	addUserToMatch(match, username_1, username_2, arrive_time)
+	return HttpResponse()
+
+def addUserToMatch(match, username_1, username_2, arrive_time):
+	if username_1 != "":
+		user_1 = User.objects.get(username=username_1)
+		user_1_match = User_Match(Id_match=match, Id_user=user_1, Arrive_time=arrive_time)
+		user_1_match.save()
+	if username_2 != "":
+		user_2 = User.objects.get(username=username_2)
+		user_2_match = User_Match(Id_match=match, Id_user=user_2, Arrive_time=arrive_time)
+		user_2_match.save()
 	return True
 
 def sign_up(request):
